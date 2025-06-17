@@ -1,0 +1,38 @@
+FAST Version: 3.6.0 11.06.25.16.16
+OS Name: Mac OS X
+OS Version: 15.0.1
+Architecture: aarch64
+Username: hridoy
+User Home: /Users/hridoy
+Working Directory: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX
+info: Got FAST_HOME from environment variable.
+info: FAST_HOME: /Users/hridoy/.local/share/Fast
+FAST_HOME: /Users/hridoy/.local/share/Fast
+Premium Status: false
+Max Memory: 1820MB
+Free Memory: 122MB
+Total Memory: 123MB
+Available Processors: 8
+D8 version: 2.1.7-r1
+R8 version: 4.0.63
+JRE Version: 1.8.0_421
+JRE Specification: 1.8
+JRE Home: /Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home
+Path Separator: :
+File Separator: /
+Line Separator: 
+
+info: fast sync initialized.
+info: Kotlin Compiler is present at: /Users/hridoy/.local/share/Fast/lib/compiler/1.9.24/kotlinc
+info: Added android.jar to classpath.
+info: Adding provided libraries to classpath.
+info: Got 75 libraries.
+info: Added 0 local runtime libraries.
+info: Added 0 local compile-time libraries.
+info: Getting local runtime aars
+info: Added 0 local runtime aars.
+info: Getting local compile-time aars
+info: Added 0 local compile-time aars.
+info: Add the rt.jar to .classpath to skip the LambdaMetaFactory class missing warning.
+info: Recommended minimum SDK: 7
+SYNC SUCCESSFUL
