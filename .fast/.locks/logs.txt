@@ -10,8 +10,8 @@ FAST_HOME from environment variable.
 FAST_HOME: /Users/hridoy/.local/share/Fast
 Premium Status: false
 Max Memory: 2048MB
-Free Memory: 15MB
-Total Memory: 20MB
+Free Memory: 18MB
+Total Memory: 24MB
 Available Processors: 8
 info: Got the JAVA_HOME from environment variable.
 info: JAVA_HOME: /Users/hridoy/.sdkman/candidates/java/current
@@ -23,18 +23,52 @@ Path Separator: :
 File Separator: /
 Line Separator: 
 
-info: fast sync initialized.
-info: Added android.jar to classpath.
-info: Adding provided libraries to classpath.
+info: fast build initialized.
+info: fast.yml is found at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/fast.yml
+info: AndroidManifest.xml is found at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/src/AndroidManifest.xml
+info: Package name is: com.hridoy.clickx
+info: KOTLIN_HOME: /Users/hridoy/.local/share/Fast/lib/compilers/kotlinc/1.9.24
+info: Cleaning build caches.
+info: Checking the availability of .xtend files.
+info: Checking the availability of .kt files.
+info: Getting provided libraries.
 info: Got 75 JAR libraries.
-info: Added 0 local runtime libraries.
-info: Added 0 local compile-time libraries.
-info: Getting local runtime aars
-info: Added 0 local runtime aars.
-info: Getting local compile-time aars
-info: Added 0 local compile-time aars.
-info: Got 0 JAR libraries.
-info: Add the rt.jar to .classpath to skip the LambdaMetaFactory class missing warning.
-info: Recommended minimum SDK: 14
-An update is available, v6.4.0
-SYNC SUCCESSFUL
+info: Added 0 local runtime JAR libraries.
+info: Added 0 local compile-time JAR libraries.
+info: Added 0 local runtime AAR libraries.
+info: Added 0 local compile-time AAR libraries.
+info: Increasing components version.
+info: Compiling java helper classes.
+info: added 2 .java sources.
+info: Calling Javac with free memory: 21MB
+info: Added custom bootclasspath to target Java 8.
+info: Successfully created javac arguments
+info: Calling javac commands.
+info: javac is successfully executed.
+info: Checking the availability of .java file.
+info: Compiling java classes with java helper sources as classpath.
+info: Compiling java classes.
+info: added 4 .java sources.
+info: Wrote file at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/com.hridoy.clickx/components.json
+info: Wrote file at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/com.hridoy.clickx/files/component_build_infos.json
+info: Copying extension icons.
+info: Reading AndroidManifest.xml
+info: Packaging compiled classes.
+info: Attach AARs Libs if provided
+info: No aars were provided to attach.
+info: Removing annotations from sources.
+info: Unjaring dependencies.
+info: Generating AndroidRuntime.jar
+info: Merging compiled sources and required deps.
+info: Moving the runtime jar to the desired dir of raw.
+info: Running the prefered dexer.
+info: Calling D8 with free memory: 21MB
+info: Using the Android API specific d8.jar
+info: D8 Dexer, version 8.6.2-dev
+info: Successfully created dexing arguments
+info: Calling dexing commands.
+info: D8 is successfully executed.
+info: Last compile time was: 2026-06-07T11:37:23+0200
+info: Project compiled at: 2026-06-07T12:17:29+0200
+info: Packaging the aix at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/out/com.hridoy.clickx.aix
+BUILD SUCCESSFUL

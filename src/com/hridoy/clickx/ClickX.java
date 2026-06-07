@@ -1,249 +1,346 @@
 package com.hridoy.clickx;
 
-import android.util.Log;
+import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
+import android.os.Build;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.FrameLayout;
 import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.Options;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
-import com.google.appinventor.components.runtime.AndroidNonvisibleComponent;
-import com.google.appinventor.components.runtime.AndroidViewComponent;
-import com.google.appinventor.components.runtime.Component;
-import com.google.appinventor.components.runtime.ComponentContainer;
+import com.google.appinventor.components.runtime.*;
+import com.google.appinventor.components.runtime.util.YailDictionary;
 import com.google.appinventor.components.runtime.util.YailList;
-
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.appinventor.components.runtime.util.YailProcedure;
+import com.hridoy.clickx.helpers.Animation;
+import com.hridoy.clickx.helpers.InteractionType;
 
 @DesignerComponent(
-		version = 9,
-		versionName = "1.1",
-		description = "Developed by Hridoy using Fast.",
+		version = 31,
+		versionName = "30.0",
+		description = "Target-Isolated Native Gesture Engine with Frame Interception Architecture.",
 		iconName = "icon.png"
 )
 public class ClickX extends AndroidNonvisibleComponent {
 
-	private static final String TAG = "ClickX";
-
-	private final Map<String, ClickListener> listeners = new ConcurrentHashMap<>();
-	private final Map<AndroidViewComponent, String> componentToInternalIdMap = new ConcurrentHashMap<>();
-	private final Map<String, String> internalToUserIdMap = new ConcurrentHashMap<>();
-	private final Map<String, AndroidViewComponent> internalIdToComponentMap = new ConcurrentHashMap<>();
+	private static final int DATA_TAG_KEY = 0x7f0a0001;
+	private final ComponentContainer container;
 
 	public ClickX(ComponentContainer container) {
 		super(container.$form());
+		this.container = container;
 	}
 
-	@SimpleEvent
-	public void Clicked(final AndroidViewComponent component, final String id) {
-		com.google.appinventor.components.runtime.EventDispatcher.dispatchEvent(this, "Clicked", component, id);
+	// ================================================================
+	// PRIVATE HELPERS / ENGINE MECHANICS
+	// ================================================================
+
+	private boolean isCallbackValid(String op, YailProcedure cb, int expected) {
+		if (cb == null) {
+			ErrorOccurred(op, "Callback execution attempt failed: Target anonymous block reference is null.");
+			return false;
+		}
+		if (cb.numArgs() != expected) {
+			ErrorOccurred(op, "Structural Block Mismatch Error: Expected a callback block with exactly " + expected + " parameters, but received " + cb.numArgs() + ".");
+			return false;
+		}
+		return true;
 	}
 
-	@SimpleEvent
-	public void LongClicked(final AndroidViewComponent component, final String id) {
-		com.google.appinventor.components.runtime.EventDispatcher.dispatchEvent(this, "LongClicked", component, id);
-	}
+	private void applyNativeRipple(View view, int color, boolean bounded) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			ColorStateList colorStateList = ColorStateList.valueOf(color);
+			Drawable currentBackground = view.getBackground();
+			Drawable maskDrawable = bounded ? new ShapeDrawable(new RectShape()) : null;
 
-	@SimpleEvent
-	public void ErrorOccurred(final String errorFrom, final String error) {
-		com.google.appinventor.components.runtime.EventDispatcher.dispatchEvent(this, "ErrorOccurred", errorFrom, error);
-	}
-
-	@SimpleFunction
-	public void AddClickListener(Object component, String userId, boolean animation) {
-		if (component instanceof YailList) {
-			multipleClickListener((YailList) component, userId, animation);
-			return;
-		}
-
-		if (!(component instanceof AndroidViewComponent)) {
-			ErrorOccurred("AddClickListener", "Invalid component type");
-			return;
-		}
-
-		AndroidViewComponent viewComponent = (AndroidViewComponent) component;
-
-		if (componentToInternalIdMap.containsKey(viewComponent)) {
-			ErrorOccurred("AddClickListener", "Component already registered");
-			return;
-		}
-
-		try {
-			String internalId = UUID.randomUUID().toString();
-
-			ClickListener listener = new ClickListener(viewComponent, internalId);
-			listeners.put(internalId, listener);
-			componentToInternalIdMap.put(viewComponent, internalId);
-			internalToUserIdMap.put(internalId, userId);
-			internalIdToComponentMap.put(internalId, viewComponent);
-
-			if (animation) {
-				ClickShrinkEffect.applyClickShrinkSelf(viewComponent.getView());
-			}
-		} catch (Exception e) {
-			ErrorOccurred("AddClickListener", "Exception: " + e.getMessage());
-		}
-	}
-
-	private void multipleClickListener(YailList components, String userId, boolean animation) {
-		if (components == null || components.size() == 0) {
-			ErrorOccurred("AddClickListener", "Component list is empty");
-			return;
-		}
-
-		try {
-			AndroidViewComponent parent = (AndroidViewComponent) components.getObject(0);
-
-			for (int i = 0; i < components.size(); i++) {
-				AndroidViewComponent child = (AndroidViewComponent) components.getObject(i);
-
-				if (componentToInternalIdMap.containsKey(child)) {
-					continue;
-				}
-
-				String internalId = UUID.randomUUID().toString();
-
-				ClickListener listener = new ClickListener(child, internalId);
-				listeners.put(internalId, listener);
-				componentToInternalIdMap.put(child, internalId);
-				internalToUserIdMap.put(internalId, userId);
-				internalIdToComponentMap.put(internalId, child);
-
-				if (animation) {
-					ClickShrinkEffect.applyClickShrinkTarget(child.getView(), parent.getView());
-				}
-			}
-		} catch (Exception e) {
-			ErrorOccurred("AddClickListener", "Exception: " + e.getMessage());
-		}
-	}
-
-	public void HandleClick(String internalId) {
-		String userId = internalToUserIdMap.get(internalId);
-		AndroidViewComponent component = internalIdToComponentMap.get(internalId);
-
-		if (userId != null && component != null) {
-			Clicked(component, userId);
-		} else {
-			ErrorOccurred("HandleClick", "Unknown internal ID: " + internalId);
-		}
-	}
-
-	public void HandleLongClick(String internalId) {
-		String userId = internalToUserIdMap.get(internalId);
-		AndroidViewComponent component = internalIdToComponentMap.get(internalId);
-
-		if (userId != null && component != null) {
-			LongClicked(component, userId);
-		} else {
-			ErrorOccurred("HandleLongClick", "Unknown internal ID: " + internalId);
-		}
-	}
-
-	@SimpleFunction
-	public void FullClickable(final String userId, AndroidViewComponent parentLayout, boolean animation) {
-		try {
-			View parentView = parentLayout.getView();
-			setupFullClickableListeners(parentView, userId, animation);
-		} catch (Exception e) {
-			ErrorOccurred("FullClickable", "Exception: " + e.getMessage());
-		}
-	}
-
-	private void setupFullClickableListeners(View view, String userId, boolean animation) {
-		if (view == null) return;
-
-		AndroidViewComponent comp = findComponentByView(view);
-
-		if (comp != null) {
+			RippleDrawable rippleDrawable = new RippleDrawable(colorStateList, currentBackground, maskDrawable);
+			view.setBackground(rippleDrawable);
 			view.setClickable(true);
-			view.setLongClickable(true);
-			view.setOnClickListener(v -> Clicked(comp, userId));
-			view.setOnLongClickListener(v -> {
-				LongClicked(comp, userId);
+		}
+	}
+
+	private void dispatchCallback(YailProcedure callback, AndroidViewComponent component, Object data) {
+		if (callback == null) return;
+
+		if (callback.numArgs() == 0) {
+			callback.call();
+		} else {
+			callback.call(component, data);
+		}
+	}
+
+	/**
+	 * Engine Pipeline Core with Intercepting Frame Layout Hijack for full click layouts.
+	 */
+	private void setupComponentPipeline(
+			final AndroidViewComponent component,
+			final Object data,
+			final Object animationTypeOrConfig,
+			final String interactionType,
+			final boolean fullClickable,
+			final YailProcedure callback) {
+
+		if (callback == null) return;
+
+		View targetView = component.getView();
+
+		// Handle the Full Clickable design pattern by inserting an intercepting wrapper layer
+		if (fullClickable && targetView instanceof ViewGroup) {
+			ViewGroup layoutGroup = (ViewGroup) targetView;
+
+			// Check if we already wrapped this view to prevent adding duplicate layers
+			if (!(layoutGroup.getChildAt(0) instanceof InterceptFrameLayout)) {
+				View innerContent = layoutGroup.getChildAt(0);
+				layoutGroup.removeView(innerContent);
+
+				InterceptFrameLayout interceptor = new InterceptFrameLayout(container.$context());
+				interceptor.addView(innerContent, new FrameLayout.LayoutParams(-1, -1));
+				layoutGroup.addView(interceptor, new FrameLayout.LayoutParams(-1, -1));
+
+				targetView = interceptor; // Re-target gesture engine straight onto our wrapper layer
+			} else {
+				targetView = layoutGroup.getChildAt(0);
+			}
+		}
+
+		final View finalActiveView = targetView;
+		finalActiveView.setTag(DATA_TAG_KEY, data);
+
+		final ClickShrinkEffect shrinkEngine = new ClickShrinkEffect(finalActiveView);
+		boolean shouldApplyShrink = false;
+
+		try {
+			if (animationTypeOrConfig instanceof Animation) {
+				Animation effect = (Animation) animationTypeOrConfig;
+				if (effect == Animation.Shrink) shouldApplyShrink = true;
+				else if (effect == Animation.Ripple) applyNativeRipple(finalActiveView, 0x20000000, true);
+			} else if (animationTypeOrConfig instanceof String) {
+				String style = ((String) animationTypeOrConfig).toUpperCase().trim();
+				if (style.equals("SHRINK")) shouldApplyShrink = true;
+				else if (style.equals("RIPPLE")) applyNativeRipple(finalActiveView, 0x20000000, true);
+			} else if (animationTypeOrConfig instanceof YailDictionary) {
+				YailDictionary dict = (YailDictionary) animationTypeOrConfig;
+				String type = dict.get("TYPE") != null ? dict.get("TYPE").toString() : "";
+				if (type.equals("CUSTOM_RIPPLE")) {
+					int color = ((Number) dict.get("COLOR")).intValue();
+					boolean bounded = (Boolean) dict.get("BOUNDED");
+					applyNativeRipple(finalActiveView, color, bounded);
+				}
+			}
+		} catch (Exception e) {
+			ErrorOccurred("AdvancedInteraction", "Configuration parse exception: " + e.getMessage());
+		}
+
+		final boolean runShrink = shouldApplyShrink;
+
+		final GestureDetector gestureDetector = new GestureDetector(finalActiveView.getContext(), new GestureDetector.SimpleOnGestureListener() {
+			@Override
+			public boolean onSingleTapConfirmed(MotionEvent e) {
+				if (interactionType.equals("CLICK")) {
+					if (runShrink) shrinkEngine.grow();
+					dispatchCallback(callback, component, finalActiveView.getTag(DATA_TAG_KEY));
+					return true;
+				}
+				return false;
+			}
+			@Override
+			public boolean onDoubleTap(MotionEvent e) {
+				if (interactionType.equals("DOUBLE_CLICK")) {
+					if (runShrink) shrinkEngine.grow();
+					dispatchCallback(callback, component, finalActiveView.getTag(DATA_TAG_KEY));
+					return true;
+				}
+				return false;
+			}
+			@Override
+			public void onLongPress(MotionEvent e) {
+				if (interactionType.equals("LONG_PRESS")) {
+					if (runShrink) shrinkEngine.grow();
+					dispatchCallback(callback, component, finalActiveView.getTag(DATA_TAG_KEY));
+				}
+			}
+			@Override
+			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+				if (runShrink) shrinkEngine.grow();
+				if (e1 == null || e2 == null) return false;
+
+				float diffY = e2.getY() - e1.getY();
+				float diffX = e2.getX() - e1.getX();
+
+				boolean triggered = false;
+				if (Math.abs(diffX) > Math.abs(diffY)) {
+					if (diffX > 0 && interactionType.equals("SWIPE_RIGHT")) triggered = true;
+					else if (diffX < 0 && interactionType.equals("SWIPE_LEFT")) triggered = true;
+				} else {
+					if (diffY > 0 && interactionType.equals("SWIPE_DOWN")) triggered = true;
+					else if (diffY < 0 && interactionType.equals("SWIPE_UP")) triggered = true;
+				}
+
+				if (triggered) {
+					dispatchCallback(callback, component, finalActiveView.getTag(DATA_TAG_KEY));
+					return true;
+				}
+				return false;
+			}
+		});
+
+		finalActiveView.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (!interactionType.equals("TOUCH_DOWN") && !interactionType.equals("TOUCH_UP")) {
+					gestureDetector.onTouchEvent(event);
+				}
+
+				switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+						if (runShrink) shrinkEngine.shrink();
+						if (interactionType.equals("TOUCH_DOWN")) {
+							dispatchCallback(callback, component, finalActiveView.getTag(DATA_TAG_KEY));
+						}
+						break;
+					case MotionEvent.ACTION_UP:
+					case MotionEvent.ACTION_CANCEL:
+						if (runShrink) shrinkEngine.grow();
+						if (interactionType.equals("TOUCH_UP")) {
+							dispatchCallback(callback, component, finalActiveView.getTag(DATA_TAG_KEY));
+						}
+						break;
+				}
 				return true;
-			});
-
-			if (animation) {
-				ClickShrinkEffect.applyClickShrinkSelf(view);
 			}
-		}
-
-		if (view instanceof ViewGroup) {
-			ViewGroup vg = (ViewGroup) view;
-			for (int i = 0; i < vg.getChildCount(); i++) {
-				setupFullClickableListeners(vg.getChildAt(i), userId, animation);
-			}
-		}
+		});
 	}
 
-	private AndroidViewComponent findComponentByView(View view) {
-		for (Map.Entry<AndroidViewComponent, String> entry : componentToInternalIdMap.entrySet()) {
-			if (entry.getKey().getView() == view) {
-				return entry.getKey();
-			}
-		}
-		return null;
-	}
+	// ================================================================
+	// CUSTOM INTERCEPTING FRAME COMPONENT
+	// ================================================================
 
-	@SimpleFunction
-	public boolean InstanceOf(Component component1, Component component2) {
-		if (component1 == null || component2 == null) return false;
-		return component1.getClass().getSimpleName().equals(component2.getClass().getSimpleName());
-	}
-
-	private final class ClickListener implements View.OnClickListener, View.OnLongClickListener {
-		final String internalId;
-		final AndroidViewComponent component;
-		private final View targetView;
-
-		ClickListener(AndroidViewComponent component, String internalId) {
-			this.component = component;
-			this.internalId = internalId;
-			this.targetView = getFinalView(component);
-			this.targetView.setOnClickListener(this);
-			this.targetView.setOnLongClickListener(this);
+	private static class InterceptFrameLayout extends FrameLayout {
+		public InterceptFrameLayout(Context context) {
+			super(context);
+			setClickable(true);
+			setFocusable(true);
 		}
 
 		@Override
-		public void onClick(View view) {
-			HandleClick(internalId);
-		}
-
-		@Override
-		public boolean onLongClick(View view) {
-			HandleLongClick(internalId);
+		public boolean onInterceptTouchEvent(MotionEvent ev) {
+			// Force intercept all downstream coordinates to bypass child view focus completely
 			return true;
 		}
+	}
 
-		private View getFinalView(AndroidViewComponent component) {
-			View view = component.getView();
-			final String className = component.getClass().getSimpleName();
+	// ================================================================
+	// PUBLIC API METHODS
+	// ================================================================
 
-			if ("MakeroidCardView".equals(className)) {
-				if (view instanceof ViewGroup) {
-					return ((ViewGroup) view).getChildAt(0);
-				}
-			}
+	@SimpleFunction(description = "Generates a configuration dictionary for customized ripple effects.")
+	public YailDictionary CustomRipple(int color, boolean bounded) {
+		YailDictionary config = new YailDictionary();
+		config.put("TYPE", "CUSTOM_RIPPLE");
+		config.put("COLOR", color);
+		config.put("BOUNDED", bounded);
+		return config;
+	}
 
-			if ("HorizontalArrangement".equals(className) || "VerticalArrangement".equals(className)) {
-				try {
-					Method isCardMethod = component.getClass().getMethod("IsCard");
-					if (isCardMethod != null && boolean.class.equals(isCardMethod.getReturnType())) {
-						boolean isCard = (boolean) isCardMethod.invoke(component);
-						if (isCard && view instanceof ViewGroup) {
-							return ((ViewGroup) view).getChildAt(0);
-						}
+	@SimpleFunction(
+			description = "Registers a single component or a YailList of components for specialized interaction tracking. Callback requires exactly 2 parameters."
+	)
+	public void AdvancedInteraction(
+			final Object componentOrList,
+			final Object data,
+			final Object animation,
+			@Options(InteractionType.class) final String interactionType,
+			final boolean fullClickable,
+			final YailProcedure callback) {
+
+		if (componentOrList == null) return;
+		if (!isCallbackValid("AdvancedInteraction", callback, 2)) return;
+
+		if (componentOrList instanceof YailList) {
+			Object[] elements = ((YailList) componentOrList).toArray();
+			for (int i = 1; i < elements.length; i++) {
+				Object item = elements[i];
+				if (item instanceof AndroidViewComponent) {
+					AndroidViewComponent comp = (AndroidViewComponent) item;
+					if (comp.getView() != null) {
+						setupComponentPipeline(comp, data, animation, interactionType, fullClickable, callback);
 					}
-				} catch (Exception e) {
-					Log.e(TAG, "getFinalView: " + e.getMessage());
 				}
 			}
-
-			return view;
+		} else if (componentOrList instanceof AndroidViewComponent) {
+			AndroidViewComponent comp = (AndroidViewComponent) componentOrList;
+			if (comp.getView() != null) {
+				setupComponentPipeline(comp, data, animation, interactionType, fullClickable, callback);
+			}
+		} else {
+			ErrorOccurred("AdvancedInteraction", "Invalid target type. Expected Component or YailList.");
 		}
+	}
+
+	@SimpleFunction(
+			description = "Registers a standard click on a single component or a YailList of components with a ripple overlay."
+	)
+	public void SimpleClick(final Object componentOrList, final YailProcedure callback) {
+		if (componentOrList == null) return;
+		if (!isCallbackValid("SimpleClick", callback, 0)) return;
+
+		if (componentOrList instanceof YailList) {
+			Object[] elements = ((YailList) componentOrList).toArray();
+			for (int i = 1; i < elements.length; i++) {
+				if (elements[i] instanceof AndroidViewComponent) {
+					AndroidViewComponent comp = (AndroidViewComponent) elements[i];
+					if (comp.getView() != null) {
+						setupComponentPipeline(comp, null, "RIPPLE", "CLICK", false, callback);
+					}
+				}
+			}
+		} else if (componentOrList instanceof AndroidViewComponent) {
+			AndroidViewComponent comp = (AndroidViewComponent) componentOrList;
+			if (comp.getView() != null) {
+				setupComponentPipeline(comp, null, "RIPPLE", "CLICK", false, callback);
+			}
+		} else {
+			ErrorOccurred("SimpleClick", "Invalid target type. Expected Component or YailList.");
+		}
+	}
+
+	@SimpleFunction(
+			description = "Registers a click on a layout container component or a YailList of layout containers, intercepting nested children clicks cleanly."
+	)
+	public void SimpleFullClick(final Object componentOrList, final YailProcedure callback) {
+		if (componentOrList == null) return;
+		if (!isCallbackValid("SimpleFullClick", callback, 0)) return;
+
+		if (componentOrList instanceof YailList) {
+			Object[] elements = ((YailList) componentOrList).toArray();
+			for (int i = 1; i < elements.length; i++) {
+				if (elements[i] instanceof AndroidViewComponent) {
+					AndroidViewComponent comp = (AndroidViewComponent) elements[i];
+					if (comp.getView() != null) {
+						setupComponentPipeline(comp, null, "RIPPLE", "CLICK", true, callback);
+					}
+				}
+			}
+		} else if (componentOrList instanceof AndroidViewComponent) {
+			AndroidViewComponent comp = (AndroidViewComponent) componentOrList;
+			if (comp.getView() != null) {
+				setupComponentPipeline(comp, null, "RIPPLE", "CLICK", true, callback);
+			}
+		} else {
+			ErrorOccurred("SimpleFullClick", "Invalid target type. Expected Component or YailList.");
+		}
+	}
+
+	@SimpleEvent(description = "Fires when verification architecture breaks or operations exception occurs.")
+	public void ErrorOccurred(final String errorFrom, final String error) {
+		EventDispatcher.dispatchEvent(this, "ErrorOccurred", errorFrom, error);
 	}
 }
