@@ -22,17 +22,79 @@ Path Separator: :
 File Separator: /
 Line Separator: 
 
-info: fast sync initialized.
-info: Kotlin Compiler is present at: /Users/hridoy/.local/share/Fast/lib/compiler/1.9.24/kotlinc
-info: Added android.jar to classpath.
-info: Adding provided libraries to classpath.
+info: fast build initialized.
+info: PROJECT_DIR: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX
+info: fast.yml is found at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/fast.yml
+info: -s passed as an argument to run the R8 task.
+info: Got the JAVA_HOME by system property.
+info: JAVA_HOME: /Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home
+info: KOTLIN_HOME: /Users/hridoy/.local/share/Fast/lib/compiler/1.9.24/kotlinc
+info: AndroidManifest.xml is found at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/src/AndroidManifest.xml
+info: Package name is: com.hridoy.clickx
+info: Cleaning build caches.
+info: Checking the availability of .kt files.
+info: Getting provided libraries.
 info: Got 75 libraries.
 info: Added 0 local runtime libraries.
 info: Added 0 local compile-time libraries.
-info: Getting local runtime aars
-info: Added 0 local runtime aars.
-info: Getting local compile-time aars
-info: Added 0 local compile-time aars.
-info: Add the rt.jar to .classpath to skip the LambdaMetaFactory class missing warning.
-info: Recommended minimum SDK: 7
-SYNC SUCCESSFUL
+info: Increasing components version.
+info: Checking the availability of .java file.
+info: Compiling java classes.
+info: Found 2 sources.
+info: Calling Javac with free memory: 120MB
+info: Added custom bootclasspath to target Java 8.
+info: Successfully created javac arguments
+info: Calling javac commands.
+warn: warning: In component ClickX, event Clicked is missing a description.
+warn: warning: In component ClickX, event LongClicked is missing a description.
+warn: warning: In component ClickX, event ErrorOccurred is missing a description.
+warn: warning: In component ClickX, method AddClickListener is missing a description.
+warn: warning: In component ClickX, method InstanceOf is missing a description.
+warn: Note: Wrote file file:/Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/classes/simple_components.json
+warn: Note: Wrote file file:/Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/classes/simple_components.txt
+warn: Note: Wrote file file:/Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/classes/simple_components_build_info.json
+warn: 10 warnings
+info: javac is successfully executed.
+info: Running naming convention verifier.
+info: Making raw files.
+info: Copying assets.
+info: Created aiwebres dir at raw.
+info: Reading AndroidManifest.xml
+info: Packaging compiled classes.
+info: Attach AARs Libs if provided
+info: No aars were provided to attach.
+info: Removing annotations from sources.
+info: Unjaring dependencies.
+info: Generating AndroidRuntime.jar
+info: Merging compiled sources and required deps.
+info: Will run the proguard task if -r passed.
+info: Calling R8 shrinker with free memory: 120MB
+info: R8 Shrinker, version 4.0.63
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/conditions$frame.class:
+info: Malformed inner-class attribute:
+info: 	outerTypeInternal: gnu/kawa/slib/conditions
+info: 	innerTypeInternal: gnu/kawa/slib/condition$Mntype
+info: 	innerName: Mntype
+info: 
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/condition$Mntype.class:
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/raise$Mnobject$Mnexception.class:
+info: 	outerTypeInternal: gnu/kawa/slib/srfi34
+info: 	innerTypeInternal: gnu/kawa/slib/raise$Mnobject$Mnexception
+info: 	innerName: Mnexception
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/srfi34.class:
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/test$Mnrunner.class:
+info: 	outerTypeInternal: gnu/kawa/slib/testing
+info: 	innerTypeInternal: gnu/kawa/slib/test$Mnrunner
+info: 	innerName: Mnrunner
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/testing.class:
+info: Info in /Users/hridoy/.local/share/Fast/lib/appinventor/kawa.jar:gnu/kawa/slib/conditions.class:
+info: R8 shrinker is successfully executed.
+info: Moving the runtime jar to the desired dir of raw.
+info: Running the prefered dexer.
+info: Calling D8 with free memory: 120MB
+info: D8 Dexer, version 2.1.7-r1
+info: Successfully created dexing arguments
+info: Calling dexing commands.
+info: D8 is successfully executed.
+info: Packaging the aix at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/out/com.hridoy.clickx.aix
+BUILD SUCCESSFUL

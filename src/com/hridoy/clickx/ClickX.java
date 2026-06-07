@@ -3,208 +3,247 @@ package com.hridoy.clickx;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
-import com.google.appinventor.components.runtime.*;
+import com.google.appinventor.components.runtime.AndroidNonvisibleComponent;
+import com.google.appinventor.components.runtime.AndroidViewComponent;
+import com.google.appinventor.components.runtime.Component;
+import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.util.YailList;
-import com.sumit1334.dynamicclickutil.ClickShrinkUtils;
-import com.sumit1334.dynamicclickutil.ClickShrinkUtilsSingle;
-import com.sumit1334.dynamicclickutil.DynamicClickUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @DesignerComponent(
-	version = 1,
-	versionName = "1.0",
-	description = "Developed by Hridoy using Fast.",
-	iconName = "icon.png"
+		version = 9,
+		versionName = "1.1",
+		description = "Developed by Hridoy using Fast.",
+		iconName = "icon.png"
 )
 public class ClickX extends AndroidNonvisibleComponent {
 
-  	public ClickX(ComponentContainer container) {
+	private static final String TAG = "ClickX";
+
+	private final Map<String, ClickListener> listeners = new ConcurrentHashMap<>();
+	private final Map<AndroidViewComponent, String> componentToInternalIdMap = new ConcurrentHashMap<>();
+	private final Map<String, String> internalToUserIdMap = new ConcurrentHashMap<>();
+	private final Map<String, AndroidViewComponent> internalIdToComponentMap = new ConcurrentHashMap<>();
+
+	public ClickX(ComponentContainer container) {
 		super(container.$form());
-	  }
-
-	private final String TAG = "ClickX";
-	private final boolean LOG_DEBUG = false;
-	private final HashMap<String, ClickX.ClickListener> listeners = new HashMap<>();
-	private final ArrayList<AndroidViewComponent> components = new ArrayList<>();
-	private final HashMap<String, String> fullClickListeners = new HashMap<>();
-
-	// ===============================================
-	// PROPERTIES START
-	// ===============================================
-
-	// ===============================================
-	// PROPERTIES END
-	// ===============================================
-
-	// ===============================================
-	// METHODS START
-	// ===============================================
-
-	@SimpleFunction
-	public void AddClickListener(AndroidViewComponent component, String id, Object data, boolean animation) {
-		if (!(this.listeners.containsKey(id) || this.components.contains(component))) {
-			this.listeners.put(id, new ClickX.ClickListener(component, data, id));
-			this.components.add(component);
-			if (animation){
-				ClickShrinkUtilsSingle.applyClickShrink(component.getView());
-			}
-
-		} else{
-			ErrorOccurred("AddClickListener", "Failed to add click listener of "+ id);
-		}
-	}
-
-	@SimpleFunction
-	public void FullClickListener(final YailList components, Object data, boolean animation){
-		final YailList componentsSubList = (YailList)components;
-		final AndroidViewComponent parentComponent = (AndroidViewComponent) componentsSubList.getObject(0);
-
-		for (int j = 0; j < componentsSubList.size(); ++j) {
-			final Object mComponent = componentsSubList.getObject(j);
-			final AndroidViewComponent animChild = (AndroidViewComponent)mComponent;
-			// Defining id for child views
-			String id = data.toString() + "_" + j + "_fullClickable_Id_" + j;
-
-			// Adding Click Listeners to child components
-			if (!(this.listeners.containsKey(id) || this.components.contains(animChild))) {
-				this.listeners.put(id, new DynamicClickUtil.ClickListener(animChild, data, id));
-				this.components.add(animChild);
-			}
-			// Adding the animation
-			if (animation){
-				ClickShrinkUtils.applyClickShrink(animChild.getView(), parentComponent.getView());
-			}
-		}
-	}
-
-	@SimpleFunction(
-			description = "Makes given view for full clickable\n" +
-					" It will consume click and long click events of all (applicable) child views\n\n" +
-					"Child views id will be - id_child1,id_child2 and so on\n" +
-					"But parent layout id remain same"
-	)
-	public void FullClickable(final String id, Object data, AndroidViewComponent parentLayout, boolean animation) {
-		View parentView = parentLayout.getView();
-		parentView.setClickable(true);
-		parentView.setLongClickable(true);
-		parentView.setOnClickListener(new OnClickListener() {
-			public void onClick(View var1x) {
-				DynamicClickUtil.this.FullClicked(id, data.toString());
-				//ClickUtil.this.Clicked(var1);
-			}
-		});
-		parentView.setOnLongClickListener(new OnLongClickListener() {
-			public boolean onLongClick(View var1x) {
-				DynamicClickUtil.this.FullLongClicked(id, data.toString());
-				//ClickUtil.this.LongClicked(var1);
-				return true;
-			}
-		});
-
-		if (animation){
-			ClickShrinkUtilsSingle.applyClickShrink(parentLayout.getView());
-		}
-
-		//
-		if (this.getViewsCount(parentView) > 0) {
-			ViewGroup parentViewGroup = (ViewGroup)parentView;
-			Iterator parentViewChilds = this.getViews(parentViewGroup).iterator();
-
-			int childIndexCounter = 1; // Initialize the child index counter for id
-
-			while(parentViewChilds.hasNext()) {
-				View ChildView = (View) parentViewChilds.next();
-				// Defining id for child views
-				String childId = id + "_child" + childIndexCounter;
-
-				ChildView.setClickable(true);
-				ChildView.setLongClickable(true);
-				ChildView.setOnClickListener(new OnClickListener() {
-					public void onClick(View var1x) {
-						DynamicClickUtil.this.FullClicked(childId, data.toString());
-						//ClickUtil.this.Clicked(var1);
-					}
-				});
-				ChildView.setOnLongClickListener(new OnLongClickListener() {
-					public boolean onLongClick(View var1x) {
-						DynamicClickUtil.this.FullLongClicked(childId, data.toString());
-						//ClickUtil.this.LongClicked(var1);
-						return true;
-					}
-				});
-				//
-				childIndexCounter++; // Increment the child index counter
-				// Adding the animation
-				if (animation){
-					ClickShrinkUtils.applyClickShrink(ChildView, parentLayout.getView());
-				}
-			}
-		}
-
-	}
-
-	@SimpleFunction
-	public boolean InstanceOf(Component component1, Component component2) {
-		return component1.getClass().getSimpleName().equals(component2.getClass().getSimpleName());
-	}
-
-	@SimpleFunction
-	public void SetData(String id, Object data) {
-		if (GetData(id) == data)
-			return;
-		this.listeners.get(id).data = data;
-	}
-
-	@SimpleFunction
-	public Object GetData(String id) {
-		return this.listeners.get(id).data;
-	}
-
-	// ===============================================
-	// METHODS END
-	// ===============================================
-
-	// ===============================================
-	// EVENTS START
-	// ===============================================
-
-	@SimpleEvent
-	public void Clicked(final AndroidViewComponent component, final String id, final Object data) {
-		EventDispatcher.dispatchEvent(this, "Clicked", component, id, data);
 	}
 
 	@SimpleEvent
-	public void LongClicked(final AndroidViewComponent component, final String id, final Object data) {
-		EventDispatcher.dispatchEvent(this, "LongClicked", component, id, data);
+	public void Clicked(final AndroidViewComponent component, final String id) {
+		com.google.appinventor.components.runtime.EventDispatcher.dispatchEvent(this, "Clicked", component, id);
 	}
 
 	@SimpleEvent
-	public void FullClicked(final String id, final Object data) {
-		EventDispatcher.dispatchEvent(this, "FullClicked", id, data);
-	}
-
-	@SimpleEvent
-	public void FullLongClicked(final String id, final Object data) {
-		EventDispatcher.dispatchEvent(this, "FullLongClicked", id, data);
+	public void LongClicked(final AndroidViewComponent component, final String id) {
+		com.google.appinventor.components.runtime.EventDispatcher.dispatchEvent(this, "LongClicked", component, id);
 	}
 
 	@SimpleEvent
 	public void ErrorOccurred(final String errorFrom, final String error) {
-		EventDispatcher.dispatchEvent(this, "ErrorOccurred", errorFrom, error);
+		com.google.appinventor.components.runtime.EventDispatcher.dispatchEvent(this, "ErrorOccurred", errorFrom, error);
 	}
 
-	// ===============================================
-	// EVENTS END
-	// ===============================================
+	@SimpleFunction
+	public void AddClickListener(Object component, String userId, boolean animation) {
+		if (component instanceof YailList) {
+			multipleClickListener((YailList) component, userId, animation);
+			return;
+		}
 
+		if (!(component instanceof AndroidViewComponent)) {
+			ErrorOccurred("AddClickListener", "Invalid component type");
+			return;
+		}
+
+		AndroidViewComponent viewComponent = (AndroidViewComponent) component;
+
+		if (componentToInternalIdMap.containsKey(viewComponent)) {
+			ErrorOccurred("AddClickListener", "Component already registered");
+			return;
+		}
+
+		try {
+			String internalId = UUID.randomUUID().toString();
+
+			ClickListener listener = new ClickListener(viewComponent, internalId);
+			listeners.put(internalId, listener);
+			componentToInternalIdMap.put(viewComponent, internalId);
+			internalToUserIdMap.put(internalId, userId);
+			internalIdToComponentMap.put(internalId, viewComponent);
+
+			if (animation) {
+				ClickShrinkEffect.applyClickShrinkSelf(viewComponent.getView());
+			}
+		} catch (Exception e) {
+			ErrorOccurred("AddClickListener", "Exception: " + e.getMessage());
+		}
+	}
+
+	private void multipleClickListener(YailList components, String userId, boolean animation) {
+		if (components == null || components.size() == 0) {
+			ErrorOccurred("AddClickListener", "Component list is empty");
+			return;
+		}
+
+		try {
+			AndroidViewComponent parent = (AndroidViewComponent) components.getObject(0);
+
+			for (int i = 0; i < components.size(); i++) {
+				AndroidViewComponent child = (AndroidViewComponent) components.getObject(i);
+
+				if (componentToInternalIdMap.containsKey(child)) {
+					continue;
+				}
+
+				String internalId = UUID.randomUUID().toString();
+
+				ClickListener listener = new ClickListener(child, internalId);
+				listeners.put(internalId, listener);
+				componentToInternalIdMap.put(child, internalId);
+				internalToUserIdMap.put(internalId, userId);
+				internalIdToComponentMap.put(internalId, child);
+
+				if (animation) {
+					ClickShrinkEffect.applyClickShrinkTarget(child.getView(), parent.getView());
+				}
+			}
+		} catch (Exception e) {
+			ErrorOccurred("AddClickListener", "Exception: " + e.getMessage());
+		}
+	}
+
+	public void HandleClick(String internalId) {
+		String userId = internalToUserIdMap.get(internalId);
+		AndroidViewComponent component = internalIdToComponentMap.get(internalId);
+
+		if (userId != null && component != null) {
+			Clicked(component, userId);
+		} else {
+			ErrorOccurred("HandleClick", "Unknown internal ID: " + internalId);
+		}
+	}
+
+	public void HandleLongClick(String internalId) {
+		String userId = internalToUserIdMap.get(internalId);
+		AndroidViewComponent component = internalIdToComponentMap.get(internalId);
+
+		if (userId != null && component != null) {
+			LongClicked(component, userId);
+		} else {
+			ErrorOccurred("HandleLongClick", "Unknown internal ID: " + internalId);
+		}
+	}
+
+	@SimpleFunction
+	public void FullClickable(final String userId, AndroidViewComponent parentLayout, boolean animation) {
+		try {
+			View parentView = parentLayout.getView();
+			setupFullClickableListeners(parentView, userId, animation);
+		} catch (Exception e) {
+			ErrorOccurred("FullClickable", "Exception: " + e.getMessage());
+		}
+	}
+
+	private void setupFullClickableListeners(View view, String userId, boolean animation) {
+		if (view == null) return;
+
+		AndroidViewComponent comp = findComponentByView(view);
+
+		if (comp != null) {
+			view.setClickable(true);
+			view.setLongClickable(true);
+			view.setOnClickListener(v -> Clicked(comp, userId));
+			view.setOnLongClickListener(v -> {
+				LongClicked(comp, userId);
+				return true;
+			});
+
+			if (animation) {
+				ClickShrinkEffect.applyClickShrinkSelf(view);
+			}
+		}
+
+		if (view instanceof ViewGroup) {
+			ViewGroup vg = (ViewGroup) view;
+			for (int i = 0; i < vg.getChildCount(); i++) {
+				setupFullClickableListeners(vg.getChildAt(i), userId, animation);
+			}
+		}
+	}
+
+	private AndroidViewComponent findComponentByView(View view) {
+		for (Map.Entry<AndroidViewComponent, String> entry : componentToInternalIdMap.entrySet()) {
+			if (entry.getKey().getView() == view) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
+
+	@SimpleFunction
+	public boolean InstanceOf(Component component1, Component component2) {
+		if (component1 == null || component2 == null) return false;
+		return component1.getClass().getSimpleName().equals(component2.getClass().getSimpleName());
+	}
+
+	private final class ClickListener implements View.OnClickListener, View.OnLongClickListener {
+		final String internalId;
+		final AndroidViewComponent component;
+		private final View targetView;
+
+		ClickListener(AndroidViewComponent component, String internalId) {
+			this.component = component;
+			this.internalId = internalId;
+			this.targetView = getFinalView(component);
+			this.targetView.setOnClickListener(this);
+			this.targetView.setOnLongClickListener(this);
+		}
+
+		@Override
+		public void onClick(View view) {
+			HandleClick(internalId);
+		}
+
+		@Override
+		public boolean onLongClick(View view) {
+			HandleLongClick(internalId);
+			return true;
+		}
+
+		private View getFinalView(AndroidViewComponent component) {
+			View view = component.getView();
+			final String className = component.getClass().getSimpleName();
+
+			if ("MakeroidCardView".equals(className)) {
+				if (view instanceof ViewGroup) {
+					return ((ViewGroup) view).getChildAt(0);
+				}
+			}
+
+			if ("HorizontalArrangement".equals(className) || "VerticalArrangement".equals(className)) {
+				try {
+					Method isCardMethod = component.getClass().getMethod("IsCard");
+					if (isCardMethod != null && boolean.class.equals(isCardMethod.getReturnType())) {
+						boolean isCard = (boolean) isCardMethod.invoke(component);
+						if (isCard && view instanceof ViewGroup) {
+							return ((ViewGroup) view).getChildAt(0);
+						}
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "getFinalView: " + e.getMessage());
+				}
+			}
+
+			return view;
+		}
+	}
 }
