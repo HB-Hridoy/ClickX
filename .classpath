@@ -3,7 +3,7 @@
     <classpathentry kind="src" path="src/" including="**/*.java|**/*.kt" />
     <classpathentry kind="output" path=".fast/bin" />
     <classpathentry kind="lib" path="/Users/hridoy/.local/share/Fast/lib/tools/rt.jar"/>
-    <classpathentry kind="lib" path="/Users/hridoy/.local/share/Fast/lib/android/android.jar"/>
+    <classpathentry kind="lib" path="/Users/hridoy/.local/share/Fast/lib/android/android-35/android.jar"/>
     <classpathentry kind="lib" path="/Users/hridoy/.local/share/Fast/lib/appinventor/httpmime.jar"/>
     <classpathentry kind="lib" path="/Users/hridoy/.local/share/Fast/lib/appinventor/osmdroid.jar"/>
     <classpathentry kind="lib" path="/Users/hridoy/.local/share/Fast/lib/appinventor/jts.jar"/>
