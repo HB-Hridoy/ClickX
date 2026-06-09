@@ -28,6 +28,7 @@ info: fast.yml is found at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2
 info: AndroidManifest.xml is found at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/src/AndroidManifest.xml
 info: Package name is: com.hridoy.clickx
 info: KOTLIN_HOME: /Users/hridoy/.local/share/Fast/lib/compilers/kotlinc/1.9.24
+info: -r passed as an argument to run the proguard task.
 info: Cleaning build caches.
 info: Checking the availability of .xtend files.
 info: Checking the availability of .kt files.
@@ -38,19 +39,16 @@ info: Added 0 local compile-time JAR libraries.
 info: Added 0 local runtime AAR libraries.
 info: Added 0 local compile-time AAR libraries.
 info: Increasing components version.
-info: Compiling java helper classes.
-info: added 2 .java sources.
+info: Checking the availability of .java file.
+info: Compiling java classes.
+info: added 1 .java sources.
 info: Calling Javac with free memory: 21MB
 info: Added custom bootclasspath to target Java 8.
 info: Successfully created javac arguments
 info: Calling javac commands.
-info: javac is successfully executed.
-info: Checking the availability of .java file.
-info: Compiling java classes with java helper sources as classpath.
-info: Compiling java classes.
-info: added 4 .java sources.
 info: Wrote file at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/com.hridoy.clickx/components.json
 info: Wrote file at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/.fast/com.hridoy.clickx/files/component_build_infos.json
+info: javac is successfully executed.
 info: Copying extension icons.
 info: Reading AndroidManifest.xml
 info: Packaging compiled classes.
@@ -60,6 +58,13 @@ info: Removing annotations from sources.
 info: Unjaring dependencies.
 info: Generating AndroidRuntime.jar
 info: Merging compiled sources and required deps.
+info: Calling ProGuard with free memory: 21MB
+info: temporary default proguard-rules.pro is created.
+info: user's proguard-rules.pro is copied to temp directory.
+info: calling proguard commands.
+info: ProGuard, version 7.9.1
+info: Note: com.hridoy.clickx.ClickX$FastTouchListener accesses a method 'IsCard()' dynamically
+info: proguard is successfully executed.
 info: Moving the runtime jar to the desired dir of raw.
 info: Running the prefered dexer.
 info: Calling D8 with free memory: 21MB
@@ -68,7 +73,7 @@ info: D8 Dexer, version 8.6.2-dev
 info: Successfully created dexing arguments
 info: Calling dexing commands.
 info: D8 is successfully executed.
-info: Last compile time was: 2026-06-08T12:59:24+0200
-info: Project compiled at: 2026-06-08T15:41:46+0200
+info: Last compile time was: 2026-06-08T15:41:46+0200
+info: Project compiled at: 2026-06-08T15:52:41+0200
 info: Packaging the aix at: /Users/hridoy/Documents/AppInventor/ExtensionsForAI2/FastExtensions/ClickX/out/com.hridoy.clickx.aix
 BUILD SUCCESSFUL

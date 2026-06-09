@@ -21,8 +21,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @DesignerComponent(
-		version = 48,
-		versionName = "5.0",
+		version = 49,
+		versionName = "v1.0.0",
 		description = "Advanced Gesture Engine featuring Dual-Mode Layout Interception Mechanics with Complete Bulk-List Iteration Operations and Zero Animation Overhead.",
 		iconName = "icon.png"
 )
